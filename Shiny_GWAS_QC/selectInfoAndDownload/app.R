@@ -4,7 +4,7 @@ library(shiny)
 library(DT)
 #define UI logic
 ui <- shinyUI(pageWithSidebar(
-  headerPanel('Download Example'),
+  headerPanel('Jon\'s ShinyApp Example'),
   sidebarPanel(
     fluidRow(
       p(class = 'text-center', downloadButton('x3', 'Download Filtered Data'))
@@ -13,7 +13,7 @@ ui <- shinyUI(pageWithSidebar(
   mainPanel(
     fluidRow(
       column(
-        6, h1('Client-side / Multiple selection'), hr(),
+        6, h1('Display Data with Multiple selection'), hr(),
         DT::dataTableOutput('x12'),
         verbatimTextOutput('y12')
       ),
@@ -42,7 +42,7 @@ server <- shinyServer(function(input, output, session) {
     s3 = input$x12_rows_selected # selected rows in data table (clicked)
     
     par(mar = c(4, 4, 1, .1))
-    plot(df, pch = 21)
+    plot(main="Magical Dynamic Graph", df, pch = 21)
     
     # solid dots (pch = 19) for current page
     if (length(s1)) {
@@ -53,6 +53,7 @@ server <- shinyServer(function(input, output, session) {
     if (length(s2) > 0 && length(s2) < nrow(df)) {
       points(df[s2, , drop = FALSE], pch = 21, cex = 3, col = 'red')
     }
+    #show blue circles when selecting rows
     if (length(s3) > 0 ){
       points(df[s3, , drop = FALSE], pch = 21, cex = 3, col = 'blue')
     }
@@ -74,8 +75,28 @@ server <- shinyServer(function(input, output, session) {
   
   # download the filtered data (search results + clicked rows)
   output$x3 = downloadHandler('filtered_data.csv', content = function(file) {
-    s = input$x12_rows_all
-    write.csv(df[s, , drop = FALSE], file)
+    s1 = input$x12_search      # rows on all pages (after being filtered by search)
+    s2 = input$x12_rows_selected # selected rows in data table (clicked)
+    
+    par(mar = c(4, 4, 1, .1))
+    #todo: find out why search is not downloading 
+    #download search & selection when both are not null 
+    # if( !(is.null(s1) || s1 == '') && length(s2) > 0 ){
+    #   s = c(s1,s2)
+    # }
+    # #download only search if select is null 
+    # else if(!(is.null(s1) || s1 == '') > 0){
+    #   s = s1
+    # }
+    # #download only select is search is null 
+    # else if (length(s2) > 0 ){
+    #   s = s2
+    # }
+    if (length(s2)>0){
+      s = s2
+    }
+    #todo: find a way to exit gracefully if both are null 
+    write.csv(df[s,,drop = FALSE], file)
   })
   
 })
